@@ -1,0 +1,27 @@
+[package]
+name = "venturegraph-api"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+venturegraph-graph = { path = "../graph" }
+axum = "*"
+chrono = { version = "*", features = ["serde"] }
+csv = "*"
+md5 = "*"
+dotenvy = "*"
+petgraph = "*"
+serde = { version = "*", features = ["derive"] }
+serde_json = "*"
+sqlx = { version = "*", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json", "migrate"] }
+tokio = { version = "*", features = ["full"] }
+tower-http = { version = "*", features = ["cors", "trace"] }
+tracing = "*"
+tracing-subscriber = { version = "*", features = ["env-filter"] }
+uuid = { version = "*", features = ["serde", "v4"] }
+
+[[bin]]
+name = "venturegraph-import"
+path = "src/bin/import.rs"
+

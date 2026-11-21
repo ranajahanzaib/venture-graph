@@ -1,0 +1,15 @@
+{
+  "name": "venturegraph",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter @venturegraph/web dev",
+    "build": "pnpm --filter @venturegraph/web build",
+    "lint": "pnpm --filter @venturegraph/web lint",
+    "typecheck": "pnpm --filter @venturegraph/web typecheck",
+    "test": "pnpm --filter @venturegraph/web test"
+  },
+  "devDependencies": {
+    "typescript": "<6.1",
+    "typescript-eslint": "^8.73.0"
+  }
+}

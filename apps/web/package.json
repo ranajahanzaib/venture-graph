@@ -1,0 +1,36 @@
+{
+  "name": "@venturegraph/web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "*",
+    "@vitejs/plugin-react": "*",
+    "graphology": "*",
+    "lucide-react": "*",
+    "react": "*",
+    "react-dom": "*",
+    "react-router-dom": "*",
+    "sigma": "*",
+    "zustand": "*",
+    "recharts": "*"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "*",
+    "@testing-library/react": "*",
+    "@types/react": "*",
+    "@types/react-dom": "*",
+    "eslint": "*",
+    "jsdom": "*",
+    "typescript": "*",
+    "vite": "*",
+    "vitest": "*"
+  }
+}
