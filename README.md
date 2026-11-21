@@ -4,6 +4,10 @@ VentureGraph explores co-investment relationships between investors. A Rust API 
 
 The included dataset is fictional demonstration data. It is useful for exploring the application, but it does not describe real investors or funding rounds.
 
+![VentureGraph overview showing the fictional investor network and workspace metrics](docs/screenshots/overview.png)
+
+The overview, analytics, and route finder screenshots below were captured from the running local application with its seeded fictional dataset.
+
 ## What it does
 
 - Explore a weighted investor network, where edge weight represents observed shared deals.
@@ -14,6 +18,16 @@ The included dataset is fictional demonstration data. It is useful for exploring
 - Import an optional Fliar aggregate-pair CSV and review its source coverage and licensing.
 
 The community view uses deterministic weighted label propagation. Community labels are heuristic groupings, not verified classifications.
+
+## Screenshots
+
+**Investor route finder.** Compare a fewest-hop route with the strongest connection route and see the shared-deal weights used for each tie.
+
+![Relationship finder showing the strongest route from Northstar Ventures to Orbit Founders Fund](docs/screenshots/paths.png)
+
+**Network analytics.** Review centrality rankings and filter source-reported co-investment pairs.
+
+![Market signals with centrality rankings and observed co-investment pairs](docs/screenshots/analytics.png)
 
 ## Run locally
 
