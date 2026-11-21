@@ -1,0 +1,5 @@
+# Data sources and licensing
+
+The built-in demo is synthetic, fictional, and separate from real data. The optional Fliar sample importer reads incrementally, accumulates batches of up to 500 rows, and writes each batch with multi-row upserts inside a single import transaction. It preserves source pair IDs, the source URL, source license, the local file name as the import's source-version label, pair-level years, and company-sector/country fields. Re-imports are idempotent for stable source pair IDs. Parse and validation errors are recorded by CSV row number. Fliar's sample is licensed CC BY-NC 4.0 and must not be treated as unrestricted commercial-use data. `top_shared_country` describes shared portfolio companies, not an investor headquarters.
+
+Dataset source and field documentation: [Fliar VC Co-Investment Network](https://fliarbi.com/datasets/investor-coinvestment-network/). The free 75,855-row sample is a fixed subset of pair edges and excludes the underlying dated rounds and full portfolios. VentureGraph does not include a Radar API integration; data access is limited to the documented CSV import workflow.

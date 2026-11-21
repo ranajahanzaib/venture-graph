@@ -58,10 +58,7 @@ representative at an online or offline event.
 
 ## Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-[INSERT CONTACT METHOD].
-All complaints will be reviewed and investigated promptly and fairly.
+Report conduct concerns privately using the contact information on [the project owner's GitHub profile](https://github.com/ranajahanzaib). Do not post personal or identifying information in public issues. Report security vulnerabilities through the repository's [private security reporting page](https://github.com/ranajahanzaib/venture-graph/security/advisories/new).
 
 All community leaders are obligated to respect the privacy and security of the
 reporter of any incident.
