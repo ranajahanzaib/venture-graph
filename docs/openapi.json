@@ -1,0 +1,551 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "VentureGraph API",
+    "version": "0.1.0",
+    "description": "Investor co-investment graph and dated synthetic demonstration event API. Fliar data is aggregate only; an observed first/last year span does not assert activity in every intermediate year."
+  },
+  "servers": [{ "url": "/" }],
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "summary": "Check API and database health",
+        "responses": {
+          "200": {
+            "description": "Database is reachable",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Health" }
+              }
+            }
+          },
+          "503": { "$ref": "#/components/responses/Unavailable" }
+        }
+      }
+    },
+    "/ready": {
+      "get": {
+        "operationId": "ready",
+        "summary": "Check database readiness",
+        "responses": {
+          "200": { "description": "Database is ready" },
+          "503": { "$ref": "#/components/responses/Unavailable" }
+        }
+      }
+    },
+    "/api/v1/meta": {
+      "get": {
+        "operationId": "meta",
+        "summary": "List API capabilities",
+        "responses": {
+          "200": {
+            "description": "API metadata",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/data-sources": {
+      "get": {
+        "operationId": "dataSources",
+        "summary": "List data source provenance and licenses",
+        "responses": {
+          "200": {
+            "description": "Data source records",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "type": "object" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/data-coverage": {
+      "get": {
+        "operationId": "dataCoverage",
+        "summary": "List coverage counts by source",
+        "responses": {
+          "200": {
+            "description": "Per-source coverage",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "type": "object" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/graph": {
+      "get": {
+        "operationId": "graph",
+        "summary": "Get a source-scoped weighted investor graph",
+        "parameters": [
+          { "$ref": "#/components/parameters/Dataset" },
+          {
+            "name": "year",
+            "in": "query",
+            "schema": { "type": "integer" },
+            "description": "For aggregate sources, selects edges whose observed range contains the year; it does not assert activity in that year."
+          },
+          {
+            "name": "sector",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Exact top shared sector filter."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10000,
+              "default": 2000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Graph nodes and weighted edges",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Graph" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" }
+        }
+      }
+    },
+    "/api/v1/temporal": {
+      "get": {
+        "operationId": "temporalSnapshot",
+        "summary": "Get a dated event snapshot (fictional demo only)",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          { "$ref": "#/components/parameters/Dataset" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Event-level graph snapshot",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Graph" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" }
+        }
+      }
+    },
+    "/api/v1/temporal/diff": {
+      "get": {
+        "operationId": "temporalDiff",
+        "summary": "Compare observed event edges between two years",
+        "description": "Supported for dated demo events only. An edge absent in a period was not observed during that period; this does not establish that a business relationship ended.",
+        "parameters": [
+          {
+            "name": "year_a",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          {
+            "name": "year_b",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "integer" }
+          },
+          { "$ref": "#/components/parameters/Dataset" }
+        ],
+        "responses": {
+          "200": {
+            "description": "New, absent, and retained pair identifiers"
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" }
+        }
+      }
+    },
+    "/api/v1/investors": {
+      "get": {
+        "operationId": "investors",
+        "summary": "Search and paginate investors",
+        "parameters": [
+          { "$ref": "#/components/parameters/Dataset" },
+          { "name": "q", "in": "query", "schema": { "type": "string" } },
+          { "name": "type", "in": "query", "schema": { "type": "string" } },
+          { "name": "country", "in": "query", "schema": { "type": "string" } },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": { "type": "integer", "minimum": 1, "default": 1 }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated investor results",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/InvestorPage" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/investors/{id}": {
+      "get": {
+        "operationId": "investorProfile",
+        "summary": "Get an investor by stable identifier",
+        "parameters": [
+          { "$ref": "#/components/parameters/InvestorId" },
+          { "$ref": "#/components/parameters/Dataset" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Investor profile",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Investor" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/v1/investors/{id}/partners": {
+      "get": {
+        "operationId": "investorPartners",
+        "summary": "List an investor's strongest observed pair edges",
+        "parameters": [
+          { "$ref": "#/components/parameters/InvestorId" },
+          { "$ref": "#/components/parameters/Dataset" },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Partner records with weights and observation years",
+            "content": {
+              "application/json": {
+                "schema": { "type": "array", "items": { "type": "object" } }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/metrics": {
+      "get": {
+        "operationId": "metrics",
+        "summary": "Get selected source counts",
+        "parameters": [{ "$ref": "#/components/parameters/Dataset" }],
+        "responses": {
+          "200": {
+            "description": "Dataset metrics",
+            "content": {
+              "application/json": { "schema": { "type": "object" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/path": {
+      "get": {
+        "operationId": "path",
+        "summary": "Find a fewest-hop or strongest-connection route",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          { "$ref": "#/components/parameters/Dataset" },
+          {
+            "name": "mode",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": ["hops", "strongest"],
+              "default": "strongest"
+            },
+            "description": "Strongest minimizes the sum of reciprocal shared-deal counts."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Path result and edge weights",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/PathResult" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" }
+        }
+      }
+    },
+    "/api/v1/communities": {
+      "get": {
+        "operationId": "components",
+        "summary": "Get connected components (not community detection)",
+        "parameters": [{ "$ref": "#/components/parameters/Dataset" }],
+        "responses": { "200": { "description": "Connected components" } }
+      }
+    },
+    "/api/v1/graph/communities": {
+      "get": {
+        "operationId": "detectedCommunities",
+        "summary": "Get weighted label-propagation communities",
+        "description": "A heuristic graph partition, not ground truth.",
+        "parameters": [{ "$ref": "#/components/parameters/Dataset" }],
+        "responses": { "200": { "description": "Community assignments" } }
+      }
+    },
+    "/api/v1/graph/similarity": {
+      "get": {
+        "operationId": "similarity",
+        "summary": "Get common neighbors and Jaccard similarity",
+        "parameters": [
+          {
+            "name": "a",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          {
+            "name": "b",
+            "in": "query",
+            "required": true,
+            "schema": { "type": "string", "format": "uuid" }
+          },
+          { "$ref": "#/components/parameters/Dataset" }
+        ],
+        "responses": {
+          "200": { "description": "Neighborhood similarity" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/v1/analytics/centrality": {
+      "get": {
+        "operationId": "centrality",
+        "summary": "Calculate centrality over the selected full dataset graph",
+        "parameters": [{ "$ref": "#/components/parameters/Dataset" }],
+        "responses": {
+          "200": {
+            "description": "Degree, weighted degree, PageRank, betweenness, and clustering metrics"
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/co-investments": {
+      "get": {
+        "operationId": "coInvestmentDiscovery",
+        "summary": "Rank co-investment pairs with source-aware filters",
+        "parameters": [
+          { "$ref": "#/components/parameters/Dataset" },
+          { "name": "sector", "in": "query", "schema": { "type": "string" } },
+          { "name": "country", "in": "query", "schema": { "type": "string" } },
+          {
+            "name": "investor_type",
+            "in": "query",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "schema": { "type": "integer" },
+            "description": "Matches aggregate observed ranges; does not establish an exact event year."
+          },
+          {
+            "name": "min_shared_deals",
+            "in": "query",
+            "schema": { "type": "integer", "minimum": 0 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 200 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pairs ordered by observed shared-deal count"
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/emerging": {
+      "get": {
+        "operationId": "emergingInvestors",
+        "summary": "Rank investors by recent source-reported first observations",
+        "description": "Discovery heuristic, not a verified annual growth rate.",
+        "parameters": [
+          { "$ref": "#/components/parameters/Dataset" },
+          {
+            "name": "since_year",
+            "in": "query",
+            "schema": { "type": "integer", "default": 2024 }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 200 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Investors ranked by aggregate pair records first observed since the threshold"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "Dataset": {
+        "name": "dataset",
+        "in": "query",
+        "schema": {
+          "type": "string",
+          "enum": ["demo", "fliar"],
+          "default": "demo"
+        }
+      },
+      "InvestorId": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string", "format": "uuid" }
+      }
+    },
+    "responses": {
+      "BadRequest": { "description": "Invalid query or path parameter" },
+      "NotFound": {
+        "description": "Identifier is not present in the selected dataset"
+      },
+      "Unavailable": { "description": "Database is not available" }
+    },
+    "schemas": {
+      "Health": {
+        "type": "object",
+        "properties": { "status": { "type": "string" } },
+        "required": ["status"]
+      },
+      "Investor": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "format": "uuid" },
+          "name": { "type": "string" },
+          "investor_type": { "type": "string" },
+          "domain": { "type": ["string", "null"] },
+          "country": { "type": ["string", "null"] }
+        },
+        "required": ["id", "name", "investor_type"]
+      },
+      "InvestorPage": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Investor" }
+          },
+          "page": { "type": "integer" },
+          "per_page": { "type": "integer" },
+          "total": { "type": "integer" },
+          "total_pages": { "type": "integer" }
+        },
+        "required": ["data", "page", "per_page", "total", "total_pages"]
+      },
+      "Edge": {
+        "type": "object",
+        "properties": {
+          "source": { "type": "string", "format": "uuid" },
+          "target": { "type": "string", "format": "uuid" },
+          "weight": { "type": "integer" },
+          "first_year": { "type": "integer" },
+          "last_year": { "type": "integer" },
+          "sector": { "type": ["string", "null"] }
+        },
+        "required": ["source", "target", "weight", "first_year", "last_year"]
+      },
+      "Graph": {
+        "type": "object",
+        "properties": {
+          "dataset": { "type": "string" },
+          "temporal_capability": { "type": "string" },
+          "nodes": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Investor" }
+          },
+          "edges": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Edge" }
+          }
+        },
+        "required": ["dataset", "temporal_capability", "nodes", "edges"]
+      },
+      "PathResult": {
+        "type": "object",
+        "properties": {
+          "found": { "type": "boolean" },
+          "path": {
+            "type": "array",
+            "items": { "type": "string", "format": "uuid" }
+          },
+          "hops": { "type": "integer" },
+          "mode": { "type": "string" },
+          "cost_definition": { "type": "string" },
+          "total_cost": { "type": "number" },
+          "edge_weights": { "type": "array", "items": { "type": "number" } }
+        },
+        "required": [
+          "found",
+          "path",
+          "hops",
+          "mode",
+          "cost_definition",
+          "total_cost",
+          "edge_weights"
+        ]
+      }
+    }
+  }
+}
